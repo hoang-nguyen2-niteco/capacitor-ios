@@ -172,6 +172,47 @@ public class CAPBridgeViewController: UIViewController, CAPBridgeDelegate, WKScr
     
   }
 
+  public override func viewWillAppear(_ animated: Bool) {
+      super.viewWillAppear(animated)
+      NotificationCenter.default.addObserver(forName:Notification.Name(rawValue:"com.heineken.event.change-country"),
+                      object:nil, queue:nil) {
+        notification in
+          UserDefaults.standard.set(notification.userInfo!["url"]!, forKey: "url")
+          self.loadWebView();
+          self.showSpiner();
+      }
+  }
+    
+  public func showSpiner(){
+      guard let delegate = UIApplication.shared.delegate else {
+        return
+      }
+      guard let window = delegate.window as? UIWindow else {
+        return
+      }
+      let spinner = UIActivityIndicatorView()
+      self.spinnerContainer.frame = CGRect(origin: CGPoint(x: 0, y: 0), size: window.bounds.size)
+      self.spinnerContainer.backgroundColor = UIColor.clear
+      self.spinnerContainer.addSubview(spinner);
+      
+      spinner.centerXAnchor.constraint(equalTo: self.spinnerContainer.centerXAnchor).isActive = true
+      spinner.centerYAnchor.constraint(equalTo: self.spinnerContainer.centerYAnchor).isActive = true
+      spinner.translatesAutoresizingMaskIntoConstraints = false
+      spinner.style = .whiteLarge
+      spinner.startAnimating()
+      
+      self.view?.addSubview(self.spinnerContainer)
+  }
+    
+  public func hideSpiner(){
+      self.spinnerContainer.removeFromSuperview(); 
+  }
+  
+  public override func viewWillDisappear(_ animated: Bool) {
+      super.viewWillDisappear(animated);
+      NotificationCenter.default.removeObserver(self, name: Notification.Name(rawValue:"com.heineken.event.change-country"), object: nil);
+  }
+
   func printLoadError() {
     let fullStartPath = URL(fileURLWithPath: assetsFolder).appendingPathComponent(startDir)
     
@@ -210,6 +251,10 @@ public class CAPBridgeViewController: UIViewController, CAPBridgeDelegate, WKScr
 //      toastPlugin!.showToast(vc: self, text: "Using app server \(hostname!)", duration: 3500)
     }
 
+    let url = UserDefaults.standard.string(forKey: "url")
+    if (url != nil && url != "") {
+        hostname = url;
+    }
     CAPLog.print("⚡️  Loading app at \(hostname!)...")
     let request = URLRequest(url: URL(string: hostname!)!)
     _ = webView?.load(request)
