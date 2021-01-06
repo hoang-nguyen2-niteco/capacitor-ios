@@ -42,6 +42,7 @@ public class CAPBridgeViewController: UIViewController, CAPBridgeDelegate, WKScr
   // Construct the Capacitor runtime
   public var bridge: CAPBridge?
   private var handler: CAPAssetHandler?
+  let spinnerContainer = UIView()
   
   override public func loadView() {
     let configUrl = Bundle.main.url(forResource: "config", withExtension: "xml")
@@ -377,7 +378,7 @@ public class CAPBridgeViewController: UIViewController, CAPBridgeDelegate, WKScr
       webViewLoadingState = .subsequentLoad
     }
     CAPLog.print("⚡️  WebView loaded")
-    
+    hideSpiner()
   }
     
     public override func viewDidLayoutSubviews() {
